@@ -1,0 +1,8 @@
+last_updated: "2026-09"
+current_build: "Multi-agent RAG routing & evaluation harnesses"
+current_learning: "Multi-agent consensus protocols and failure recovery patterns"
+current_question: "Where does RAG end and fine-tuning or long-context reasoning become necessary?"
+bandwidth_allocation:
+  "Product Engineering": 40
+  "AI Reliability": 30
+  "University Curriculum": 30
