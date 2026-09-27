@@ -1,0 +1,6 @@
+title: "Evaluating Retrieval in Real-World RAG: Beyond Toy Benchmarks"
+topic: "Failures of naive top-k semantic search, benefits of RRF, latency vs accuracy trade-offs"
+status: "PUBLISHED"
+summary: "Why standard top-k vector cosine similarity consistently degrades on complex enterprise manuals, how Reciprocal Rank Fusion preserves deterministic keyword veracity, and the empirical trade-off between reranking precision and token latency."
+draft: false
+
