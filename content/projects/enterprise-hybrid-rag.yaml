@@ -1,0 +1,31 @@
+id: "project-enterprise-hybrid-rag"
+slug: "enterprise-hybrid-rag"
+title: "Enterprise Knowledge Assistant — Hybrid RAG System"
+status: "COMPLETED"
+type: "AI_SYSTEM"
+context: "Developed as an internal system for enterprise document intelligence."
+problem: "Standard dense retrieval failed on diverse PDF schemas and domain-specific terminology."
+hypothesis: "Combining dense retrieval with BM25 via Reciprocal Rank Fusion, followed by reranking, will stabilize retrieval."
+approach: "Built a FastAPI backend with document upload, chunking, and a hybrid vector search abstraction."
+architecture: "Document Ingestion -> Chunking -> Embeddings & BM25 -> RRF -> BGE Reranker -> Grounded Generation."
+personal_contribution:
+  - "Designed the hybrid retrieval architecture"
+  - "Implemented the VectorStore abstraction and FastAPI endpoints"
+  - "Integrated PyMuPDF OCR fallback for image-heavy documents"
+evaluation: "Compared single-retriever vs hybrid performance using standard eval sets."
+results:
+  - "Improved exact-match retrieval for technical terminology"
+  - "Reduced hallucination rate by enforcing source attribution"
+learnings:
+  - "Long retrieval paths increased response latency"
+  - "Normalizing dense cosine similarity and sparse BM25 scores introduces threshold instability; RRF rank-based blending eliminates score divergence."
+stack: ["LlamaIndex", "ChromaDB", "FastAPI", "React", "TypeScript", "Python"]
+core_features: 
+  - "BM25 + dense retrieval"
+  - "Reciprocal Rank Fusion"
+  - "BGE reranker"
+  - "PyMuPDF OCR fallback"
+  - "MD5 caching"
+evidence: "GitHub repo, LinkedIn architecture documentation"
+related_experiments: ["exp-01-rrf-vs-weighted-fusion"]
+featured: true
