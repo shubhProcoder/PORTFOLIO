@@ -1,0 +1,19 @@
+id: "project-agentforge"
+slug: "agentforge"
+title: "AgentForge"
+status: "IN_PROGRESS"
+type: "AI_RELIABILITY_EVALUATION"
+context: "Created to provide robust evaluation for AI agents executing tool calls."
+problem: "Agent execution is often non-deterministic, making tool invocation testing fragile."
+approach: "Built a sandboxed execution environment with structured traces and idempotency checks."
+personal_contribution:
+  - "Designed the agent runtime execution boundaries"
+  - "Implemented idempotency verification and fault injection testing"
+stack: ["Python", "Pytest", "FastAPI", "Docker"]
+core_features:
+  - "Agent runtime"
+  - "Sandboxed tool execution"
+  - "Idempotency verification"
+  - "Structured evaluation traces"
+evidence: "System specification and testing harnesses"
+featured: true
