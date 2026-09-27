@@ -1,0 +1,6 @@
+title: "EXP-02: Local Embedding Latency under Memory Constraints"
+hypothesis: "Running a quantized small-embedding model locally reduces TTFB compared to external API calls for small chunks."
+status: "REVISED"
+learning: "CPU inference spikes under burst requests caused memory contention; hybrid local cache + batched external API proved superior."
+draft: false
+
