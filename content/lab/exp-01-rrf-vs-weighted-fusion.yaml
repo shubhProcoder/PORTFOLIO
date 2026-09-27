@@ -1,0 +1,6 @@
+title: "EXP-01: Reciprocal Rank Fusion vs Weighted Score Fusion"
+hypothesis: "RRF provides more stable retrieval rank orders across diverse PDF schemas without score normalization drift."
+status: "VALIDATED"
+learning: "Normalizing dense cosine similarity and sparse BM25 scores introduces threshold instability; RRF rank-based blending eliminates score divergence."
+draft: false
+
