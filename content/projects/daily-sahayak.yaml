@@ -1,0 +1,25 @@
+id: "project-daily-sahayak"
+slug: "daily-sahayak"
+title: "Daily Sahayak"
+status: "IN_PROGRESS"
+type: "PRODUCT"
+context: "Personal project to reduce execution friction and turn planning into action."
+problem: "Traditional task managers lack adaptive priority calculation and focus execution modes."
+approach: "Developed an intelligent daily planning system that prioritizes tasks, generates schedules, and adapts using execution feedback."
+architecture: "Next.js frontend with adaptive planning algorithms and natural language task input."
+personal_contribution:
+  - "Sole developer and designer"
+  - "Implemented priority scoring and urgency weighting logic"
+  - "Designed the adaptive scheduling engine"
+results:
+  - "Working prototype deployed"
+stack: ["Next.js", "TypeScript", "Tailwind CSS"]
+core_features:
+  - "Priority scoring"
+  - "Urgency/importance weighting"
+  - "Schedule generator"
+  - "Calendar conflict resolution"
+  - "Adaptive planning"
+evidence: "GitHub repository (shubhProcoder/Daily-Sahayak)"
+github_url: "https://github.com/shubhProcoder/Daily-Sahayak"
+featured: true
