@@ -1,0 +1,23 @@
+id: "project-geointel-ai"
+slug: "geointel-ai"
+title: "GeoIntel AI"
+status: "COMPLETED"
+type: "HACKATHON_TEAM_PROJECT"
+context: "Smart India Hackathon (SIH) Internal Round (Top 65 / 111 teams)"
+problem: "Geological mining reports are dense and difficult to query accurately."
+approach: "Developed a RAG pipeline leveraging Gemini API and Pinecone for traceable analysis of mining reports."
+team_contribution:
+  - "Collaborated on UI development and report parsing"
+  - "Integrated Streamlit frontend"
+personal_contribution:
+  - "Designed the core RAG vector retrieval pipeline"
+  - "Implemented Pinecone integration and OCR preprocessing"
+results:
+  - "Placed Top 65 out of 111 teams in internal SIH round"
+stack: ["Gemini API", "Pinecone", "OCR", "Python", "Streamlit"]
+core_features:
+  - "Geological document intelligence"
+  - "RAG vector retrieval"
+  - "Traceable mining report analysis"
+evidence: "SIH competition submission records"
+featured: true
