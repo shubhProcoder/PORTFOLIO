@@ -1,0 +1,112 @@
+/* ============================================================
+   GLOBALS.CSS — Computational Scrapbook / Editorial Design System
+   Source of Truth for Visual Design
+   ============================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Ground & Paper */
+  --paper:              #FAF7F2;   /* Warm ivory base */
+  --paper-warm:         #EFECE4;   /* Warm secondary paper */
+  --paper-bright:       #FFFFFF;   /* Clean white */
+
+  /* Ink */
+  --ink:                #11100F;   /* Deep carbon black */
+  --ink-secondary:      #4A4641;   /* Warm charcoal */
+  --ink-ghost:          #9C968E;   /* Faint stone */
+
+  /* Saturated Signals */
+  --cobalt:             #2563EB;   /* Electric royal cobalt */
+  --cobalt-dark:        #1D4ED8;
+  --cobalt-light:       #60A5FA;
+  --coral:              #EF4444;   /* Coral red accent dot */
+  --lime:               #16A34A;   /* Online indicator */
+
+  /* Typography variables mapped from layout */
+  --font-editorial:     var(--font-editorial), 'Fraunces', Georgia, serif;
+  --font-machine:       var(--font-machine), 'IBM Plex Mono', monospace;
+  --font-sans:          var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-system:        var(--font-sans);
+}
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background-color: var(--paper);
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-system);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--cobalt);
+    color: #ffffff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 3px;
+  }
+}
+
+/* Subtle tactile paper grain overlay */
+.grain-overlay {
+  position: relative;
+}
+
+.grain-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Continuous infinite horizontal marquee */
+@keyframes tickerLoop {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: tickerLoop 24s linear infinite;
+  will-change: transform;
+}
+
+.animate-ticker-slow {
+  display: flex;
+  width: max-content;
+  animation: tickerLoop 50s linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker,
+  .animate-ticker-slow {
+    animation: none;
+  }
+}
