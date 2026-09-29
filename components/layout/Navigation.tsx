@@ -103,29 +103,51 @@ export function Navigation() {
           })}
         </ul>
 
-        {/* Global Live Status Indicator */}
-        <div
-          className={`flex items-center gap-2 font-mono text-xs tracking-[0.14em] font-semibold ${
-            isDarkWorld ? 'text-neutral-300' : 'text-[#11100F]'
-          }`}
-        >
-          <span
-            className={`w-2 h-2 rounded-full animate-pulse ${
-              isAsk
-                ? 'bg-[#C084FC]'
-              : isLabs
-                ? 'bg-[#10B981]'
-              : isProcess
-                ? 'bg-[#38BDF8]'
-                : isObservations
-                ? 'bg-[#F59E0B]'
-                : isWork
-                ? 'bg-[#38BDF8]'
-                : 'bg-[#16A34A]'
+        {/* Global Live Status Indicator & Cmd+K Hint */}
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => {
+              const event = new KeyboardEvent('keydown', {
+                key: 'k',
+                metaKey: true,
+                bubbles: true,
+              });
+              window.dispatchEvent(event);
+            }}
+            className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded border ${
+              isDarkWorld 
+                ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white' 
+                : 'border-neutral-300 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900'
+            } transition-colors font-mono text-[10px] tracking-widest`}
+            title="Open Command Palette"
+          >
+            <span className="opacity-70">⌘</span>
+            <span>K</span>
+          </button>
+          
+          <div
+            className={`flex items-center gap-2 font-mono text-xs tracking-[0.14em] font-semibold ${
+              isDarkWorld ? 'text-neutral-300' : 'text-[#11100F]'
             }`}
-            aria-hidden="true"
-          />
-          BUILDING
+          >
+            <span
+              className={`w-2 h-2 rounded-full animate-pulse ${
+                isAsk
+                  ? 'bg-[#C084FC]'
+                : isLabs
+                  ? 'bg-[#10B981]'
+                : isProcess
+                  ? 'bg-[#38BDF8]'
+                  : isObservations
+                  ? 'bg-[#F59E0B]'
+                  : isWork
+                  ? 'bg-[#38BDF8]'
+                  : 'bg-[#16A34A]'
+              }`}
+              aria-hidden="true"
+            />
+            BUILDING
+          </div>
         </div>
       </nav>
     </header>

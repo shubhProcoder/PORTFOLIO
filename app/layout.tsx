@@ -2,6 +2,7 @@ import './globals.css';
 import { Fraunces, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import type { Metadata } from 'next';
 import { Navigation } from '@/components/layout/Navigation';
+import { CommandPalette } from '@/components/ui/CommandPalette';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${fraunces.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
       <body>
         <Navigation />
+        <CommandPalette />
         {children}
       </body>
     </html>
