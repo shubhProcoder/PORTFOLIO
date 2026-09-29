@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
-import { ObservationMatrix } from './ObservationMatrix';
+import { ObservationCanvas } from './ObservationCanvas';
 
 interface Observation {
   id: string;
@@ -93,205 +93,237 @@ const observationsData: Observation[] = [
   },
 ];
 
+// ─── Design token palette ──────────────────────────────────────────────────
+// Page background  #F4F3EF  (warm paper)
+// Primary surface  #FAFAF7  (bright paper)
+// Secondary surface #ECEAE4 (warm gray)
+// Text             #171717  (near-black ink)
+// Muted text       #6F6D68  (warm stone)
+// Border           #D9D6CE  (parchment)
+// Blue             #315EA8  (cobalt — semantic: systems/links)
+// Amber            #B78318  (amber — semantic: numbers/hypotheses/active)
+// ──────────────────────────────────────────────────────────────────────────
+
 export function ObservationReader() {
   const [activeId, setActiveId] = useState<string>(observationsData[0].id);
   const activeArticle = observationsData.find((o) => o.id === activeId) || observationsData[0];
 
   return (
-    <div className="relative min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#1a1528] via-[#09090b] to-[#000000] text-zinc-300 selection:bg-amber-500/30 selection:text-amber-200 font-sans">
-      {/* Background Interactive Halftone Matrix */}
-      <div className="fixed inset-0 z-0 opacity-40 mix-blend-screen pointer-events-none">
-        <ObservationMatrix activeTheme={activeArticle.theme} />
+    // Warm paper canvas — the entire page is the document
+    <div className="relative min-h-screen bg-[#F4F3EF] text-[#171717] selection:bg-[#315EA8]/20 selection:text-[#315EA8]">
+
+      {/* Silent background — discovered, not noticed */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <ObservationCanvas activeTheme={activeArticle.theme} />
       </div>
 
-      {/* Atmospheric Glow */}
-      <div className="fixed top-0 left-1/4 w-[50vw] h-[50vw] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 right-1/4 w-[40vw] h-[40vw] bg-blue-500/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      <header className="relative z-10 pt-28 pb-14 px-6 md:px-12 lg:px-20 max-w-[1400px] mx-auto">
 
-      {/* Hero Atmosphere Strip */}
-      <header className="relative z-10 pt-28 pb-16 px-6 md:px-12 lg:px-20 max-w-[1400px] mx-auto border-b border-white/10">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs font-bold tracking-[0.2em] text-[#F59E0B] uppercase">
-              CHAPTER // 02
-            </span>
-            <span className="text-white/20">/</span>
-            <span className="font-mono text-xs tracking-[0.16em] text-neutral-400 uppercase">
-              FIELD NOTES &amp; ESSAYS
-            </span>
+        {/* Breadcrumb docket — mono metadata layer */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-10">
+          <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase text-[#6F6D68]">
+            <span className="text-[#B78318] font-bold">CHAPTER // 02</span>
+            <span className="text-[#D9D6CE]">/</span>
+            <span>FIELD NOTES & ESSAYS</span>
           </div>
-
-          <div className="flex items-center gap-2 font-mono text-xs text-neutral-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] animate-pulse" />
-            LIVING COMPUTATIONAL MAGAZINE
+          <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-[#6F6D68]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B78318]" />
+            LIVING DOCUMENT
           </div>
         </div>
 
-        <h1 className="font-editorial text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-zinc-200 to-zinc-600 max-w-4xl leading-[0.96]">
-          Field Notes on <span className="italic text-blue-400">Emergent</span> Systems &amp;{' '}
-          <span className="italic text-amber-400">Non-Obvious</span> Failures.
+        {/* Hero headline — serif, near-black, with semantic color accents */}
+        <h1 className="font-editorial text-5xl sm:text-7xl md:text-8xl font-normal tracking-tight text-[#171717] max-w-4xl leading-[0.94]">
+          Field Notes on{' '}
+          <span className="italic text-[#315EA8]">Emergent</span>{' '}
+          Systems &amp;{' '}
+          <span className="italic text-[#B78318]">Non-Obvious</span>{' '}
+          Failures.
         </h1>
 
-        <p className="mt-8 text-zinc-400 font-sans text-base md:text-lg max-w-2xl leading-relaxed font-light">
-          Rigorous post-mortems, architectural observations, and engineering hypotheses documented during the build
-          cycle. Not generic advice — verifiable field research.
+        {/* Supporting copy — clean sans */}
+        <p className="mt-8 text-[#6F6D68] font-sans text-[15px] max-w-xl leading-relaxed tracking-wide uppercase font-medium">
+          Rigorous post-mortems, architectural observations, and engineering hypotheses
+          documented during the build cycle. Not generic advice — verifiable field research.
         </p>
+
+        {/* Thin divider */}
+        <div className="mt-14 h-px bg-[#D9D6CE]" />
       </header>
 
-      {/* Main Magazine Layout: Article Index on Left, Longform Reading on Right */}
-      <main className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          
-          {/* Left Column: Interactive Editorial Index */}
-          <aside className="lg:col-span-4 sticky top-28 space-y-4">
-            <div className="font-mono text-xs tracking-[0.18em] uppercase text-neutral-500 mb-6 flex items-center justify-between">
+      {/* ── MAIN LAYOUT ───────────────────────────────────────────────────── */}
+      <main className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 py-12 pb-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+
+          {/* ── LEFT: Editorial Index ────────────────────────────────────── */}
+          <aside className="lg:col-span-4 sticky top-24">
+            {/* Index header */}
+            <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#6F6D68] mb-6 flex items-center justify-between">
               <span>INDEX OF OBSERVATIONS</span>
-              <span>[{observationsData.length.toString().padStart(2, '0')}]</span>
+              <span className="text-[#B78318]">[{observationsData.length.toString().padStart(2, '0')}]</span>
             </div>
 
-            <div className="space-y-3">
-              {observationsData.map((obs) => {
+            {/* Observation index items */}
+            <div className="space-y-0">
+              {observationsData.map((obs, idx) => {
                 const isActive = obs.id === activeId;
                 return (
                   <button
                     key={obs.id}
                     onClick={() => setActiveId(obs.id)}
-                    className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 group relative overflow-hidden ${
-                      isActive
-                        ? 'bg-white/[0.03] border-amber-500/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_8px_30px_rgba(245,158,11,0.04)] backdrop-blur-xl'
-                        : 'bg-transparent border-transparent hover:bg-white/[0.02] hover:border-white/5'
-                    }`}
+                    className="w-full text-left group relative transition-colors duration-200"
                   >
-                    {/* Active Accent Glow */}
-                    {isActive && (
-                      <span className="absolute -left-1 top-1/4 bottom-1/4 w-1 bg-amber-500/80 rounded-r-full blur-[2px]" />
+                    {/* Top rule */}
+                    <div className={`h-px w-full mb-0 transition-colors duration-200 ${isActive ? 'bg-[#B78318]' : 'bg-[#D9D6CE] group-hover:bg-[#171717]/30'}`} />
+
+                    <div className={`flex gap-0 transition-colors duration-200 ${isActive ? '' : ''}`}>
+                      {/* Amber active marker — left vertical rule */}
+                      <div className={`w-px flex-shrink-0 mr-5 transition-colors duration-200 ${isActive ? 'bg-[#B78318]' : 'bg-transparent group-hover:bg-[#D9D6CE]'}`} />
+
+                      <div className="py-6 flex-1">
+                        {/* Obs number + status */}
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <span className={`font-mono text-[11px] font-bold tracking-[0.2em] ${isActive ? 'text-[#B78318]' : 'text-[#6F6D68] group-hover:text-[#171717]'}`}>
+                            {obs.number}
+                          </span>
+                          <span className="font-mono text-[9px] uppercase tracking-widest text-[#6F6D68]/70">
+                            {obs.status}
+                          </span>
+                        </div>
+
+                        {/* Title — serif */}
+                        <h2 className={`font-editorial text-xl font-normal leading-snug transition-colors ${isActive ? 'text-[#171717]' : 'text-[#6F6D68] group-hover:text-[#171717]'}`}>
+                          {obs.title}
+                        </h2>
+
+                        {/* Metadata footer */}
+                        <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
+                          <span className={isActive ? 'text-[#315EA8]' : 'text-[#6F6D68]/60'}>{obs.category}</span>
+                          <span className="text-[#6F6D68]/50">{obs.date}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom rule on last item */}
+                    {idx === observationsData.length - 1 && (
+                      <div className="h-px bg-[#D9D6CE]" />
                     )}
-
-                    <div className="flex items-center justify-between mb-3">
-                      <span
-                        className={`font-mono text-[10px] font-bold tracking-widest ${
-                          isActive ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-400'
-                        }`}
-                      >
-                        OBS // {obs.number}
-                      </span>
-                      <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-600 bg-white/5 px-2 py-0.5 rounded-full border border-white/5">
-                        {obs.status}
-                      </span>
-                    </div>
-
-                    <h2
-                      className={`font-editorial text-lg md:text-xl font-normal leading-snug transition-colors ${
-                        isActive ? 'text-zinc-100' : 'text-zinc-400 group-hover:text-zinc-200'
-                      }`}
-                    >
-                      {obs.title}
-                    </h2>
-
-                    <div className="mt-4 flex items-center justify-between text-[10px] uppercase font-mono tracking-wider text-zinc-600">
-                      <span>{obs.category}</span>
-                      <span>{obs.date}</span>
-                    </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Matrix Control Note */}
-            <div className="mt-8 p-4 rounded-lg bg-[#0E1015]/40 border border-white/5 text-[11px] font-mono text-neutral-500 leading-relaxed">
-              <span className="text-[#60A5FA] font-bold">INTERFERENCE ENGINE:</span> Canvas background simulates dual-source
-              wave diffraction. Move cursor over the page to modulate wave density; select articles to trigger phase shifts.
-            </div>
+            {/* Archive note — quiet footnote */}
+            <p className="mt-10 font-mono text-[10px] tracking-[0.12em] text-[#6F6D68]/50 leading-relaxed max-w-[26ch]">
+              BACKGROUND TOPOLOGY CORRESPONDS TO THE ACTIVE OBSERVATION&apos;S SYSTEM DIAGRAM.
+            </p>
           </aside>
 
-          {/* Right Column: Longform Calm Reading Experience */}
-          <div className="lg:col-span-8 relative">
+          {/* ── RIGHT: Research Document ─────────────────────────────────── */}
+          <div className="lg:col-span-8">
             <AnimatePresence mode="wait">
               <motion.article
                 key={activeArticle.id}
-                initial={{ opacity: 0, y: 15, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -15, filter: 'blur(4px)' }}
-                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                className="bg-white/[0.02] backdrop-blur-3xl border border-white/[0.06] rounded-[2rem] p-8 sm:p-12 lg:p-16 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_16px_40px_rgba(0,0,0,0.4)]"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+                // Paper surface: off-white, very subtle border, no heavy shadow
+                className="bg-[#FAFAF7] border border-[#D9D6CE] max-w-[760px]"
               >
-                {/* Article Metadata Docket */}
-                <div className="flex flex-wrap items-center justify-between gap-4 pb-8 mb-10 border-b border-white/[0.06] text-xs font-mono">
-                  <div className="flex items-center gap-4">
-                    <div className="px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                      <span className="text-amber-500/90 font-bold tracking-widest text-[10px]">
-                        OBSERVATION {activeArticle.number}
-                      </span>
+                {/* Document top rule */}
+                <div className="h-[3px] bg-[#B78318]" />
+
+                <div className="px-10 sm:px-14 py-12 sm:py-16">
+
+                  {/* Metadata docket — mono layer */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-8 mb-10 border-b border-[#D9D6CE]">
+                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase">
+                      <span className="text-[#B78318] font-bold">OBSERVATION {activeArticle.number}</span>
+                      <span className="text-[#D9D6CE] mx-3">—</span>
+                      <span className="text-[#315EA8]">{activeArticle.category}</span>
                     </div>
-                    <span className="text-zinc-500 uppercase tracking-widest text-[10px]">{activeArticle.category}</span>
+                    <div className="font-mono text-[10px] tracking-widest text-[#6F6D68] uppercase">
+                      {activeArticle.date}
+                    </div>
                   </div>
-                  <div className="text-zinc-600 tracking-widest text-[10px] uppercase bg-white/[0.03] px-3 py-1 rounded-full border border-white/[0.05]">{activeArticle.date}</div>
-                </div>
 
-                {/* Article Headline */}
-                <h2 className="font-editorial text-3xl sm:text-5xl font-normal text-zinc-100 leading-[1.1] tracking-tight">
-                  {activeArticle.title}
-                </h2>
+                  {/* Article Headline — serif, ink black */}
+                  <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl font-normal text-[#171717] leading-[1.08] tracking-tight">
+                    {activeArticle.title}
+                  </h2>
 
-                {/* Abstract / Summary Callout */}
-                <div className="my-10 p-8 rounded-2xl bg-white/[0.02] border border-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] relative overflow-hidden">
-                  <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-blue-500/50 to-transparent" />
-                  <p className="text-zinc-300 font-sans text-lg leading-relaxed font-light">
+                  {/* ABSTRACT section label */}
+                  <div className="mt-10 mb-4 font-mono text-[10px] tracking-[0.22em] uppercase text-[#6F6D68]">
+                    ABSTRACT
+                  </div>
+
+                  {/* Abstract — borderless, the text IS the callout */}
+                  <p className="text-[#171717] font-sans text-[17px] leading-[1.75] border-l-2 border-[#315EA8] pl-5">
                     {activeArticle.summary}
                   </p>
-                </div>
 
-                {/* Observation Body Sections */}
-                <div className="space-y-14 my-14">
-                  {activeArticle.body.map((sec, idx) => (
-                    <section key={idx} className="space-y-5">
-                      <h3 className="font-editorial text-2xl font-normal text-zinc-200 flex items-center gap-4">
-                        <span className="font-mono text-xs text-amber-500/70 font-bold bg-amber-500/10 px-2 py-0.5 rounded">§{idx + 1}</span>
-                        {sec.sectionTitle}
-                      </h3>
-                      <p className="font-sans text-zinc-400 text-[17px] leading-[1.8] font-light">
-                        {sec.content}
-                      </p>
-                    </section>
-                  ))}
-                </div>
+                  {/* Divider */}
+                  <div className="my-12 h-px bg-[#ECEAE4]" />
 
-                {/* Related System Nodes & Key Question */}
-                <div className="mt-16 pt-12 border-t border-white/[0.06] space-y-10">
-                  {/* Key Unresolved Question */}
-                  <div className="p-8 rounded-2xl bg-amber-500/[0.02] border border-amber-500/10 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
-                    <div className="font-mono text-[10px] font-bold tracking-[0.2em] uppercase text-amber-500/80 mb-4">
+                  {/* Body sections */}
+                  <div className="space-y-12">
+                    {activeArticle.body.map((sec, idx) => (
+                      <section key={idx}>
+                        {/* Section number + title */}
+                        <h3 className="font-editorial text-2xl font-normal text-[#171717] leading-snug flex items-baseline gap-4 mb-4">
+                          <span className="font-mono text-[11px] text-[#B78318] font-bold flex-shrink-0">
+                            §{String(idx + 1).padStart(2, '0')}
+                          </span>
+                          {sec.sectionTitle}
+                        </h3>
+                        <p className="font-sans text-[#6F6D68] text-[16px] leading-[1.85]">
+                          {sec.content}
+                        </p>
+                      </section>
+                    ))}
+                  </div>
+
+                  {/* Divider */}
+                  <div className="mt-14 mb-12 h-px bg-[#ECEAE4]" />
+
+                  {/* Unresolved Research Hypothesis */}
+                  <div className="border border-[#B78318]/30 bg-[#B78318]/[0.03] p-8">
+                    <div className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#B78318] font-bold mb-5">
                       UNRESOLVED RESEARCH HYPOTHESIS
                     </div>
-                    <p className="font-sans text-zinc-200 text-lg leading-relaxed font-light italic">
+                    <p className="font-editorial text-[#171717] text-xl leading-relaxed italic">
                       &ldquo;{activeArticle.keyQuestion}&rdquo;
                     </p>
                   </div>
 
-                  {/* Related Project Link & Tech Stack */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 text-xs font-mono">
+                  {/* Footer: Related project + tech */}
+                  <div className="mt-12 pt-8 border-t border-[#D9D6CE] grid grid-cols-1 sm:grid-cols-2 gap-10 font-mono text-[11px]">
                     <div>
-                      <span className="text-zinc-600 uppercase tracking-widest block mb-4 text-[10px]">
+                      <div className="uppercase tracking-[0.18em] text-[#6F6D68] mb-4 text-[10px]">
                         CORRESPONDING SYSTEM IN ARCHIVE
-                      </span>
+                      </div>
                       <Link
                         href={activeArticle.relatedProjectHref}
-                        className="group inline-flex items-center gap-3 p-3 pr-5 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/20 transition-all text-zinc-300 hover:text-white"
+                        className="inline-flex items-center gap-2 text-[#315EA8] hover:text-[#171717] font-bold tracking-wide transition-colors group"
                       >
-                        <span className="p-1.5 rounded-lg bg-white/5 text-zinc-500 group-hover:text-zinc-300 group-hover:bg-white/10 transition-colors">↗</span>
-                        <span className="font-semibold tracking-wide text-xs">{activeArticle.relatedProject}</span>
+                        <span className="w-3 h-px bg-current" />
+                        <span>{activeArticle.relatedProject}</span>
+                        <span className="text-[#D9D6CE] group-hover:text-[#315EA8] transition-colors">↗</span>
                       </Link>
                     </div>
 
                     <div>
-                      <span className="text-zinc-600 uppercase tracking-widest block mb-4 text-[10px]">
+                      <div className="uppercase tracking-[0.18em] text-[#6F6D68] mb-4 text-[10px]">
                         RELEVANT TECHNICAL PRIMITIVES
-                      </span>
+                      </div>
                       <div className="flex flex-wrap gap-2">
                         {activeArticle.relatedTech.map((t) => (
-                          <span key={t} className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-zinc-400 text-[10px] tracking-wider uppercase">
+                          <span
+                            key={t}
+                            className="px-2.5 py-1 border border-[#D9D6CE] text-[#6F6D68] text-[9px] tracking-widest uppercase bg-[#ECEAE4]"
+                          >
                             {t}
                           </span>
                         ))}

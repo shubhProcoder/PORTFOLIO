@@ -25,7 +25,7 @@ export function Navigation() {
   const isProcess = pathname === '/process';
   const isLabs = pathname === '/labs';
   const isAsk = pathname === '/ask';
-  const isDarkWorld = isWork || isObservations || isProcess || isLabs || isAsk;
+  const isDarkWorld = isWork || isProcess || isLabs || isAsk;
 
   return (
     <header
@@ -36,11 +36,9 @@ export function Navigation() {
           ? 'bg-[#041310]/90 border-b border-[#10B981]/20 text-white'
         : isProcess
           ? 'bg-[#06101B]/85 border-b border-[#38BDF8]/20 text-white'
-          : isObservations
-          ? 'bg-[#08090B]/85 border-b border-white/10 text-white'
           : isWork
           ? 'bg-[#0C0E14]/85 border-b border-white/10 text-white'
-          : 'bg-[#FAF7F2]/90 border-b border-neutral-200/60 text-[#11100F]'
+          : 'bg-[#F4F3EF]/90 border-b border-[#D9D6CE] text-[#171717]'
       }`}
     >
       <nav
@@ -51,7 +49,7 @@ export function Navigation() {
         <Link
           href="/"
           className={`font-sans font-bold text-xs md:text-sm tracking-[0.16em] uppercase transition-opacity hover:opacity-80 ${
-            isDarkWorld ? 'text-white' : 'text-[#11100F]'
+            isDarkWorld ? 'text-white' : 'text-[#171717]'
           }`}
         >
           SHUBH MEHROTRA
@@ -78,16 +76,17 @@ export function Navigation() {
               } else if (isProcess) {
                 activeClasses = 'text-[#38BDF8] font-bold border-b-2 border-[#38BDF8] pb-1';
               } else if (isObservations) {
-                activeClasses = 'text-[#F59E0B] font-bold border-b-2 border-[#F59E0B] pb-1';
+                // Amber underline on warm paper — semantic, not glowing
+                activeClasses = 'text-[#171717] font-bold border-b-2 border-[#B78318] pb-1';
               } else if (isWork) {
                 activeClasses = 'text-[#38BDF8] font-bold border-b-2 border-[#38BDF8] pb-1';
               } else {
-                activeClasses = 'text-[#11100F] font-bold border-b-2 border-[#11100F] pb-1';
+                activeClasses = 'text-[#171717] font-bold border-b-2 border-[#171717] pb-1';
               }
             } else {
               activeClasses = isDarkWorld
                 ? 'text-neutral-400 hover:text-white'
-                : 'text-neutral-700 hover:text-[#2563EB]';
+                : 'text-[#6F6D68] hover:text-[#171717]';
             }
 
             return (
@@ -115,9 +114,9 @@ export function Navigation() {
               window.dispatchEvent(event);
             }}
             className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded border ${
-              isDarkWorld 
-                ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white' 
-                : 'border-neutral-300 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900'
+              isDarkWorld
+                ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white'
+                : 'border-[#D9D6CE] bg-[#ECEAE4] hover:bg-[#D9D6CE] text-[#6F6D68] hover:text-[#171717]'
             } transition-colors font-mono text-[10px] tracking-widest`}
             title="Open Command Palette"
           >
@@ -127,7 +126,7 @@ export function Navigation() {
           
           <div
             className={`flex items-center gap-2 font-mono text-xs tracking-[0.14em] font-semibold ${
-              isDarkWorld ? 'text-neutral-300' : 'text-[#11100F]'
+              isDarkWorld ? 'text-neutral-300' : 'text-[#171717]'
             }`}
           >
             <span
@@ -139,7 +138,7 @@ export function Navigation() {
                 : isProcess
                   ? 'bg-[#38BDF8]'
                   : isObservations
-                  ? 'bg-[#F59E0B]'
+                  ? 'bg-[#B78318]'
                   : isWork
                   ? 'bg-[#38BDF8]'
                   : 'bg-[#16A34A]'
