@@ -1,159 +1,236 @@
 'use client';
 
 /**
- * AuroraCanvas — Hybrid "Ink & Glow" Background Layer
+ * AuroraCanvas — Atmospheric Ambient Mesh / Aurora Layer
  *
- * Context: Hero & Work Grid (dark-mode surface)
+ * Inspired by HackerRank & Stripe's ultra-slow, organic liquid mesh gradients.
  *
- * Implementation: Pure CSS + SVG feGaussianBlur (Option 1 approach).
- * - No WebGL dependency. No external library. Zero JS animation loop.
- * - Three organic glow shapes driven by independent CSS @keyframes.
- * - Film-grain noise overlay masks digital banding artifacts.
- * - Fully non-blocking: pointer-events: none, z-index: -1.
- * - prefers-reduced-motion: all animations freeze instantly.
+ * Key Characteristics (HackerRank style):
+ * - Ultra-slow cycle times (50s – 84s) for a calm, breathing atmospheric feel.
+ * - Massive diffusion blur (stdDeviation 130px + 95px) so edges dissolve into clouds.
+ * - Four organic drifting centroids with non-repeating cubic harmonic intervals.
+ * - Grain noise overlay prevents 8-bit color banding artifacts.
+ * - Zero JS overhead: 100% GPU-accelerated CSS transforms + SVG feGaussianBlur.
+ * - prefers-reduced-motion: freezes instantaneously into an elegant static mesh.
+ * - Strictly non-interactive: pointer-events: none, z-index: 0.
  *
- * Color System (from globals.css & DESIGN.md §3.1):
- *   --color-glow-1: #2B4AE8  (cobalt  — dominant anchor, 60% opacity)
- *   --color-glow-2: #7B3FE4  (violet  — tension/depth,   50% opacity)
- *   --color-glow-3: #C9B8F0  (lavender— ambient whisper,  38% opacity)
- *
- * Variant: "dark"  → glows on #0C0E14 ink base  (Hero / Work Grid)
- * Variant: "light" → ultra-low opacity edge glows on #FAF7F2 paper base (Case Studies)
+ * Variants:
+ *   - "hackerrank" (or "light"): Ethereal mint, soft cyan, pastel lime on clean light base.
+ *   - "dark": Electric cobalt, saturated violet, lavender whisper on deep ink.
  */
 
 interface AuroraCanvasProps {
-  variant?: 'dark' | 'light';
+  variant?: 'dark' | 'light' | 'hackerrank';
   className?: string;
+  speed?: 'slow' | 'ultraslow';
 }
 
-export function AuroraCanvas({ variant = 'dark', className = '' }: AuroraCanvasProps) {
-  const isDark = variant === 'dark';
+export function AuroraCanvas({
+  variant = 'dark',
+  className = '',
+  speed = 'ultraslow',
+}: AuroraCanvasProps) {
+  const isHackerRank = variant === 'hackerrank' || variant === 'light';
+
+  // Ultra-slow cycle multipliers (HackerRank style uses 50-84s loops)
+  const duration1 = speed === 'ultraslow' ? '65s' : '45s';
+  const duration2 = speed === 'ultraslow' ? '78s' : '52s';
+  const duration3 = speed === 'ultraslow' ? '56s' : '38s';
+  const duration4 = speed === 'ultraslow' ? '84s' : '60s';
+
+  // Palette selection based on variant
+  const colors = isHackerRank
+    ? {
+        // HackerRank luminous fresh palette
+        blob1: '#67E8F9', // Soft cyan / aqua
+        blob2: '#6EE7B7', // HackerRank soft mint
+        blob3: '#BEF264', // Pastel lime / spring glow
+        blob4: '#A5F3FC', // Whispering sky tint
+        baseBg: 'transparent',
+        opacity1: 0.42,
+        opacity2: 0.38,
+        opacity3: 0.35,
+        opacity4: 0.28,
+        noiseOpacity: 0.03,
+        noiseBlend: 'multiply' as const,
+      }
+    : {
+        // Engineering dark ink palette (Cobalt + Violet + Lavender)
+        blob1: '#2B4AE8', // Cobalt anchor
+        blob2: '#7B3FE4', // Violet tension
+        blob3: '#C9B8F0', // Lavender ambient
+        blob4: '#38BDF8', // Subtle sky spark
+        baseBg: 'transparent',
+        opacity1: 0.58,
+        opacity2: 0.46,
+        opacity3: 0.34,
+        opacity4: 0.25,
+        noiseOpacity: 0.05,
+        noiseBlend: 'soft-light' as const,
+      };
 
   return (
     <>
-      {/* ── Inline keyframes + reduced-motion override ─────────────────── */}
+      {/* ── Ultra-slow drifting harmonic keyframes ───────────────────────── */}
       <style>{`
-        @keyframes aurora-drift-1 {
-          0%   { transform: translate(0px, 0px)    scale(1.00) rotate(0deg);   }
-          33%  { transform: translate(40px, -30px) scale(1.08) rotate(6deg);   }
-          66%  { transform: translate(-20px, 20px) scale(0.96) rotate(-4deg);  }
-          100% { transform: translate(0px, 0px)    scale(1.00) rotate(0deg);   }
+        @keyframes hr-aurora-drift-1 {
+          0%   { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
+          25%  { transform: translate3d(60px, -45px, 0) scale(1.12) rotate(8deg); }
+          50%  { transform: translate3d(20px, 35px, 0) scale(0.94) rotate(-5deg); }
+          75%  { transform: translate3d(-50px, -20px, 0) scale(1.06) rotate(6deg); }
+          100% { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
         }
-        @keyframes aurora-drift-2 {
-          0%   { transform: translate(0px, 0px)     scale(1.00) rotate(0deg);  }
-          40%  { transform: translate(-50px, 25px)  scale(1.06) rotate(-8deg); }
-          75%  { transform: translate(30px, -15px)  scale(1.03) rotate(5deg);  }
-          100% { transform: translate(0px, 0px)     scale(1.00) rotate(0deg);  }
+
+        @keyframes hr-aurora-drift-2 {
+          0%   { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
+          30%  { transform: translate3d(-70px, 50px, 0) scale(1.09) rotate(-10deg); }
+          60%  { transform: translate3d(45px, -30px, 0) scale(0.92) rotate(7deg); }
+          85%  { transform: translate3d(-25px, 20px, 0) scale(1.04) rotate(-4deg); }
+          100% { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
         }
-        @keyframes aurora-drift-3 {
-          0%   { transform: translate(0px, 0px)    scale(1.00) rotate(0deg);   }
-          50%  { transform: translate(25px, 35px)  scale(1.05) rotate(10deg);  }
-          100% { transform: translate(0px, 0px)    scale(1.00) rotate(0deg);   }
+
+        @keyframes hr-aurora-drift-3 {
+          0%   { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
+          35%  { transform: translate3d(40px, 60px, 0) scale(1.15) rotate(12deg); }
+          70%  { transform: translate3d(-35px, -40px, 0) scale(0.88) rotate(-8deg); }
+          100% { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
+        }
+
+        @keyframes hr-aurora-drift-4 {
+          0%   { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
+          40%  { transform: translate3d(-45px, -55px, 0) scale(1.08) rotate(9deg); }
+          75%  { transform: translate3d(55px, 25px, 0) scale(0.95) rotate(-6deg); }
+          100% { transform: translate3d(0, 0, 0) scale(1.0) rotate(0deg); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .aurora-glow-1,
-          .aurora-glow-2,
-          .aurora-glow-3 { animation: none !important; }
+          .hr-aurora-shape {
+            animation: none !important;
+          }
         }
       `}</style>
 
-      {/* ── Inline SVG blur filter definition ──────────────────────────── */}
+      {/* ── Heavy Gaussian Blur SVG filters for cloud-like dispersion ───── */}
       <svg
         aria-hidden="true"
         style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
       >
         <defs>
-          <filter id="aurora-blur-heavy">
-            <feGaussianBlur stdDeviation="80" />
+          <filter id="hr-aurora-blur-ultra" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="130" />
           </filter>
-          <filter id="aurora-blur-soft">
-            <feGaussianBlur stdDeviation="55" />
+          <filter id="hr-aurora-blur-soft" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="95" />
           </filter>
         </defs>
       </svg>
 
-      {/* ── Glow layer wrapper ──────────────────────────────────────────── */}
+      {/* ── Container ─────────────────────────────────────────────────── */}
       <div
         aria-hidden="true"
-        className={className}
+        className={`pointer-events-none select-none ${className}`}
         style={{
           position: 'absolute',
           inset: 0,
           overflow: 'hidden',
-          pointerEvents: 'none',
           zIndex: 0,
+          background: colors.baseBg,
         }}
       >
-        {/* ── Glow 1 — Cobalt: dominant anchor, bottom-left ────────────── */}
+        {/* Shape 1: Top-left / West centroid (Cyan / Aqua on light; Cobalt on dark) */}
         <div
-          className="aurora-glow-1"
+          className="hr-aurora-shape"
           style={{
             position: 'absolute',
-            bottom: isDark ? '-10%' : '-5%',
-            left: isDark ? '-5%' : '-8%',
-            width: '65%',
-            height: '75%',
-            borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%',
-            background: `#2B4AE8`,
-            opacity: isDark ? 0.62 : 0.10,
-            filter: 'url(#aurora-blur-heavy)',
+            top: '-15%',
+            left: '-10%',
+            width: '68vw',
+            height: '68vw',
+            maxWidth: '900px',
+            maxHeight: '900px',
+            borderRadius: '62% 38% 70% 30% / 45% 55% 45% 55%',
+            background: colors.blob1,
+            opacity: colors.opacity1,
+            filter: 'url(#hr-aurora-blur-ultra)',
             willChange: 'transform',
-            animation: 'aurora-drift-1 28s ease-in-out infinite',
+            animation: `hr-aurora-drift-1 ${duration1} ease-in-out infinite`,
           }}
         />
 
-        {/* ── Glow 2 — Violet: tension layer, top-right ────────────────── */}
+        {/* Shape 2: Top-right / East centroid (Mint on light; Violet on dark) */}
         <div
-          className="aurora-glow-2"
+          className="hr-aurora-shape"
           style={{
             position: 'absolute',
-            top: isDark ? '-15%' : '-8%',
-            right: isDark ? '-8%' : '-10%',
-            width: '55%',
-            height: '65%',
-            borderRadius: '40% 60% 30% 70% / 60% 40% 70% 30%',
-            background: `#7B3FE4`,
-            opacity: isDark ? 0.50 : 0.09,
-            filter: 'url(#aurora-blur-heavy)',
+            top: '-20%',
+            right: '-12%',
+            width: '62vw',
+            height: '62vw',
+            maxWidth: '850px',
+            maxHeight: '850px',
+            borderRadius: '40% 60% 35% 65% / 60% 40% 60% 40%',
+            background: colors.blob2,
+            opacity: colors.opacity2,
+            filter: 'url(#hr-aurora-blur-ultra)',
             willChange: 'transform',
-            animation: 'aurora-drift-2 36s ease-in-out infinite',
+            animation: `hr-aurora-drift-2 ${duration2} ease-in-out infinite`,
           }}
         />
 
-        {/* ── Glow 3 — Lavender: ambient whisper, center ───────────────── */}
+        {/* Shape 3: Bottom-center / South-East (Pastel Lime on light; Lavender on dark) */}
         <div
-          className="aurora-glow-3"
+          className="hr-aurora-shape"
           style={{
             position: 'absolute',
-            top: '30%',
-            left: '25%',
-            width: '45%',
-            height: '50%',
-            borderRadius: '70% 30% 50% 50% / 40% 60% 40% 60%',
-            background: `#C9B8F0`,
-            opacity: isDark ? 0.38 : 0.12,
-            filter: 'url(#aurora-blur-soft)',
+            bottom: '-18%',
+            right: '15%',
+            width: '55vw',
+            height: '55vw',
+            maxWidth: '750px',
+            maxHeight: '750px',
+            borderRadius: '52% 48% 62% 38% / 38% 62% 38% 62%',
+            background: colors.blob3,
+            opacity: colors.opacity3,
+            filter: 'url(#hr-aurora-blur-soft)',
             willChange: 'transform',
-            animation: 'aurora-drift-3 22s ease-in-out infinite',
+            animation: `hr-aurora-drift-3 ${duration3} ease-in-out infinite`,
           }}
         />
 
-        {/* ── Film grain noise overlay (masks digital banding) ─────────── */}
+        {/* Shape 4: Subtle central harmonic fill */}
+        <div
+          className="hr-aurora-shape"
+          style={{
+            position: 'absolute',
+            top: '25%',
+            left: '20%',
+            width: '45vw',
+            height: '45vw',
+            maxWidth: '650px',
+            maxHeight: '650px',
+            borderRadius: '65% 35% 45% 55% / 50% 50% 50% 50%',
+            background: colors.blob4,
+            opacity: colors.opacity4,
+            filter: 'url(#hr-aurora-blur-ultra)',
+            willChange: 'transform',
+            animation: `hr-aurora-drift-4 ${duration4} ease-in-out infinite`,
+          }}
+        />
+
+        {/* ── Anti-banding film grain overlay ─────────────────────────── */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            opacity: isDark ? 0.055 : 0.035,
+            opacity: colors.noiseOpacity,
             backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E\")",
+              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
             backgroundRepeat: 'repeat',
             backgroundSize: '256px 256px',
-            mixBlendMode: isDark ? 'soft-light' : 'multiply',
+            mixBlendMode: colors.noiseBlend,
           }}
         />
       </div>
     </>
   );
 }
-
