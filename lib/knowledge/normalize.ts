@@ -11,6 +11,7 @@ import {
   getJourney,
   getNow,
   getTaxonomy,
+  getObservations,
 } from '../content';
 import type {
   KnowledgeEntity,
@@ -240,6 +241,135 @@ export function normalizeContentToEntities(): { entities: KnowledgeEntity[]; rel
       evidenceState: classifyEvidenceState(exp.status as EntityStatus, exp.draft),
       isDraft: exp.draft,
     });
+  }
+
+  // ── OBSERVATIONS ──
+  const allObservations = getObservations();
+  for (const obs of allObservations) {
+    const obsId = `obs-${obs.slug}`;
+    const blockFields: Record<string, string> = {};
+    const codeBlocks: string[] = [];
+    const quoteBlocks: string[] = [];
+
+    for (const block of obs.blocks) {
+      if (block.content) {
+        if (block.type === 'code') {
+          codeBlocks.push(block.content);
+        } else if (block.type === 'quote') {
+          quoteBlocks.push(block.content);
+        } else {
+          // context, observation, question, analysis, learning, impact
+          blockFields[block.type] = block.content;
+        }
+      }
+    }
+
+    const fields: Record<string, string | string[] | undefined> = {
+      title: obs.title,
+      subtitle: obs.subtitle,
+      excerpt: obs.excerpt,
+      type: obs.type,
+      tags: obs.tags,
+      source_kind: obs.source.kind,
+      source_platform: obs.source.platform,
+      original_url: obs.source.originalUrl,
+      // Block-level structured fields
+      context: blockFields.context,
+      observation: blockFields.observation,
+      question: blockFields.question,
+      analysis: blockFields.analysis,
+      learning: blockFields.learning,
+      impact: blockFields.impact,
+      code: codeBlocks.length > 0 ? codeBlocks.join('\n---\n') : undefined,
+      quote: quoteBlocks.length > 0 ? quoteBlocks.join('\n---\n') : undefined,
+      // Editorial
+      keyQuestion: obs.editorial?.keyQuestion,
+      hypothesis: obs.editorial?.hypothesis,
+    };
+
+    entities.push({
+      id: obsId,
+      type: 'OBSERVATION',
+      title: obs.title,
+      status: obs.status as EntityStatus,
+      route: `/observations/${obs.slug}`,
+      sourcePath: `observations/${obs.slug}.yaml`,
+      fields,
+      searchableText: buildSearchableText(fields),
+      evidenceState: classifyEvidenceState(obs.status as EntityStatus, obs.draft),
+      isDraft: obs.draft,
+    });
+
+    // PERSON → OBSERVED → OBSERVATION
+    relationships.push({
+      from: personId,
+      to: obsId,
+      type: 'OBSERVED',
+      label: `Observed: ${obs.title}`,
+    });
+
+    // OBSERVATION → APPLIED_TO → PROJECT
+    if (obs.relatedProjects) {
+      for (const projSlug of obs.relatedProjects) {
+        relationships.push({
+          from: obsId,
+          to: `project-${projSlug}`,
+          type: 'APPLIED_TO',
+          label: `Applied to project ${projSlug}`,
+        });
+      }
+    }
+
+    // OBSERVATION → TESTED_IN → LAB
+    if (obs.relatedLabs) {
+      for (const labSlug of obs.relatedLabs) {
+        relationships.push({
+          from: obsId,
+          to: `lab-${labSlug}`,
+          type: 'TESTED_IN',
+          label: `Tested in lab ${labSlug}`,
+        });
+      }
+    }
+
+    // OBSERVATION → USES → TECHNOLOGY
+    if (obs.relatedTechnologies) {
+      for (const tech of obs.relatedTechnologies) {
+        const techId = `tech-${tech.toLowerCase().replace(/[\s.]+/g, '-')}`;
+        if (!entities.find(e => e.id === techId)) {
+          entities.push({
+            id: techId,
+            type: 'TECHNOLOGY',
+            title: tech,
+            status: 'ACTIVE' as EntityStatus,
+            route: '/work',
+            sourcePath: 'technologies/taxonomy.yaml',
+            fields: { name: tech },
+            searchableText: tech.toLowerCase(),
+            evidenceState: 'VERIFIED_FACT',
+            isDraft: false,
+          });
+        }
+        relationships.push({
+          from: obsId,
+          to: techId,
+          type: 'USES',
+          label: `Uses ${tech}`,
+        });
+      }
+    }
+
+    // OBSERVATION → CONNECTED_TO → OBSERVATION
+    if (obs.relatedObservations) {
+      for (const relSlug of obs.relatedObservations) {
+        relationships.push({
+          from: obsId,
+          to: `obs-${relSlug}`,
+          type: 'CONNECTED_TO',
+          label: `Connected to observation ${relSlug}`,
+        });
+      }
+    }
   }
 
   // ── JOURNEY ──

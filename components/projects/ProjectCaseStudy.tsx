@@ -15,7 +15,7 @@ interface ProjectCaseStudyProps {
 
 export function ProjectCaseStudy({ project }: ProjectCaseStudyProps) {
   return (
-    <article className="max-w-[1000px] mx-auto pt-24 pb-32 px-6 md:px-12 flex flex-col gap-16 md:gap-24 font-mono text-neutral-300">
+    <article className="max-w-[1000px] mx-auto pt-24 pb-32 px-6 md:px-12 flex flex-col gap-16 md:gap-24 font-mono text-[#4A453E] relative z-10">
       <ProjectHeader project={project} />
       
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">

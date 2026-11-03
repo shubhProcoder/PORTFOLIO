@@ -27,6 +27,7 @@ It is not a brochure. It is an exploration of a cognitive architecture. The visi
 - **First 2m:** Checks "Journey" for education/internship timeline.
 - **Ideal Exit:** Clicks "Resume" or "Email" from the persistent navigation or footer.
 
+
 ### 2.2 The Founder / Startup Operator
 **Goal:** Assess product thinking, shipping ability, business relevance, and problem-identification.
 - **Ideal Path:** Hero → Selected Work (STORY mode) → Project Case Study (Focuses on Problem, Outcome, Learnings) → Lab (To see how quickly they iterate) → Contact.

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { AuroraCanvas } from '@/components/visual/AuroraCanvas';
 
 interface ProjectRecord {
   id: string;
@@ -132,6 +133,9 @@ export function WorkArchive() {
 
   return (
     <div className="relative min-h-screen bg-[#0C0E14] text-[#E5E7EB] selection:bg-[#38BDF8] selection:text-black">
+      {/* ── Aurora glow substrate (dark variant — glows pop work thumbnails) */}
+      <AuroraCanvas variant="dark" />
+
       {/* Background Archival Coordinate Grid */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.035]"

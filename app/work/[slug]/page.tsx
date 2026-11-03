@@ -1,5 +1,6 @@
 import { getProjects } from '@/lib/content';
 import { ProjectCaseStudy } from '@/components/projects/ProjectCaseStudy';
+import { AuroraCanvas } from '@/components/visual/AuroraCanvas';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 
@@ -35,7 +36,9 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#0C0E14] text-neutral-300 selection:bg-[#38BDF8] selection:text-[#0C0E14]">
+    /* Paper & Whisper — light reading surface with ultra-low edge glows */
+    <main className="relative min-h-screen bg-[#FAF7F2] text-[#1A1816] overflow-hidden selection:bg-[#2B4AE8] selection:text-white">
+      <AuroraCanvas variant="light" />
       <ProjectCaseStudy project={project} />
     </main>
   );

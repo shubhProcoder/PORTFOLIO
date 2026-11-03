@@ -1,14 +1,18 @@
 import Image from 'next/image';
 import { HeroTicker } from '@/components/visual/HeroTicker';
+import { AuroraCanvas } from '@/components/visual/AuroraCanvas';
 
 export function HeroContent() {
   return (
     <section
       id="hero"
-      className="relative min-h-[calc(100vh)] flex flex-col justify-between pt-20 md:pt-24 overflow-hidden grain-overlay bg-[#FAF7F2]"
+      className="relative min-h-[calc(100vh)] flex flex-col justify-between pt-20 md:pt-24 overflow-hidden bg-[#0C0E14]"
       aria-label="Hero — I Build Systems for Things That Don't Exist."
     >
-      {/* Background Moving Identity — Frosted Glass Minimalist Stream (Right to Left) */}
+      {/* ── Aurora glow substrate ─────────────────────────────────────── */}
+      <AuroraCanvas variant="dark" />
+
+      {/* Background Moving Identity — Ghost ticker stream (Right to Left) */}
       <div
         className="absolute top-28 md:top-24 left-0 right-0 overflow-hidden pointer-events-none select-none z-0"
         aria-hidden="true"
@@ -35,7 +39,7 @@ export function HeroContent() {
           
           {/* Left Column: Manifesto & Narrative */}
           <div className="lg:col-span-6 xl:col-span-6 z-10">
-            <h1 className="font-editorial text-[3.6rem] sm:text-[4.6rem] md:text-[5.4rem] lg:text-[5.6rem] xl:text-[6.4rem] leading-[0.98] tracking-[-0.02em] text-[#11100F] font-normal select-none">
+            <h1 className="font-editorial text-[3.6rem] sm:text-[4.6rem] md:text-[5.4rem] lg:text-[5.6rem] xl:text-[6.4rem] leading-[0.98] tracking-[-0.02em] text-white font-normal select-none">
               I Build Systems
               <br />
               <span className="italic text-[#2563EB] font-normal">for Things</span> That
@@ -43,7 +47,7 @@ export function HeroContent() {
               Don&apos;t Exist<span className="text-[#EF4444] font-bold">.</span>
             </h1>
 
-            <p className="mt-6 md:mt-8 text-neutral-700 text-base md:text-[1.05rem] leading-[1.65] max-w-lg font-sans">
+            <p className="mt-6 md:mt-8 text-white/60 text-base md:text-[1.05rem] leading-[1.65] max-w-lg font-sans">
               Crafting technical architectures for emerging technologies. Merging rigorous engineering with intuitive product design to build resilient systems where no blueprints exist.
             </p>
 
@@ -57,7 +61,7 @@ export function HeroContent() {
               </a>
               <a
                 href="#thinking"
-                className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-transparent hover:bg-black/5 text-[#11100F] border border-[#11100F] font-mono text-xs md:text-[13px] font-bold tracking-[0.14em] uppercase transition-all duration-150"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-full bg-transparent hover:bg-white/10 text-white border border-white/30 font-mono text-xs md:text-[13px] font-bold tracking-[0.14em] uppercase transition-all duration-150"
               >
                 READ OBSERVATIONS
               </a>
@@ -68,7 +72,7 @@ export function HeroContent() {
               {['RAG', 'AGENTS', 'EVALUATION', 'PRODUCT'].map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center px-3.5 py-1 rounded-full border border-neutral-300/90 text-neutral-600 font-mono text-[11px] md:text-xs font-medium uppercase tracking-[0.1em] bg-white/40 select-none"
+                  className="inline-flex items-center px-3.5 py-1 rounded-full border border-white/20 text-white/50 font-mono text-[11px] md:text-xs font-medium uppercase tracking-[0.1em] bg-white/5 select-none"
                 >
                   {tag}
                 </span>

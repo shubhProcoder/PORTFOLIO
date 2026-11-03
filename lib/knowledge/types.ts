@@ -6,6 +6,7 @@
 export type EntityType =
   | 'PERSON'
   | 'PROJECT'
+  | 'OBSERVATION'
   | 'THINKING'
   | 'LAB'
   | 'JOURNEY'
@@ -53,7 +54,7 @@ export interface KnowledgeEntity {
 export interface Relationship {
   from: string; // entity id
   to: string;   // entity id
-  type: string;  // e.g. BUILT, USES, RELATED_TO, TESTS, LED_TO
+  type: string;  // e.g. BUILT, USES, RELATED_TO, TESTS, LED_TO, OBSERVED
   label: string; // human-readable label
 }
 
@@ -86,6 +87,24 @@ export interface EvidenceObject {
     learning?: string;
     hypothesis?: string;
     evidence?: string;
+    // Observation specific fields
+    observation?: string;
+    context?: string;
+    analysis?: string;
+    impact?: string;
+    keyQuestion?: string;
+    observationType?: string;
+    sourcePlatform?: string;
+    sourceKind?: string;
+    originalUrl?: string;
+  };
+  /** Explicit provenance for nuanced evidence tracking */
+  provenance?: {
+    sourceKind: string;
+    sourcePlatform: string;
+    author: string;
+    blockType?: string;
+    originalUrl?: string;
   };
 }
 

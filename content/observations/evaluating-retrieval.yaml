@@ -1,0 +1,98 @@
+slug: evaluating-retrieval
+title: "Evaluating Retrieval in Real-World RAG: Beyond Toy Benchmarks"
+subtitle: "Why standard top-k metrics consistently fail on production documents, and what to measure instead"
+type: TECHNICAL_NOTE
+status: PUBLISHED
+excerpt: "Why standard top-k vector cosine similarity consistently degrades on complex enterprise manuals, how Reciprocal Rank Fusion preserves deterministic keyword veracity, and the empirical trade-off between reranking precision and token latency."
+createdAt: "2024-09-01"
+updatedAt: "2024-11-20"
+publishedAt: "2024-09-15"
+
+source:
+  kind: NATIVE
+  canonicalLocation: PORTFOLIO
+  availability: AVAILABLE
+
+tags:
+  - retrieval
+  - rag
+  - embeddings
+  - production-systems
+  - hybrid-search
+
+blocks:
+  - type: context
+    label: CONTEXT
+    editorial: PERSONAL_OBSERVATION
+    content: "This observation emerged from building an Enterprise Knowledge Assistant at Techno-India NJR. The system had to answer questions about 200+ pages of nested policy documents, maintenance manuals, and technical specifications. Standard RAG tutorials suggested embedding everything and running cosine similarity. It worked on toy demos. It failed in production."
+
+  - type: observation
+    label: WHAT I NOTICED
+    editorial: PERSONAL_OBSERVATION
+    content: "When indexing multi-page PDFs with nested tables, part numbers, and error codes, pure dense embedding retrieval frequently fails. High cosine similarity matched semantic conceptual descriptions while completely missing precise alphanumeric identifiers. A user asking for \"Section 4.1.2 torque limit\" did not want semantic proximity to torque — they required exact lexical coordinates. Dense models were systematically hallucinating retrieval confidence while returning plausible-sounding but factually wrong chunks."
+
+  - type: question
+    label: OPEN QUESTION
+    editorial: OPEN_QUESTION
+    content: "If a dense embedding model generates high cosine similarity for semantically adjacent but lexically incorrect chunks, does the fundamental problem lie in the embedding space, the chunking strategy, or the evaluation metric being used to measure retrieval quality?"
+
+  - type: analysis
+    label: ANALYSIS
+    editorial: INTERPRETATION
+    content: "Weighted score fusion between BM25 (sparse) and dense cosine scores requires score normalization that collapses across varied chunk lengths and vocabularies — a fragile process that produces inconsistent results. Reciprocal Rank Fusion (RRF) bypasses score calibration entirely by evaluating rank positions rather than raw scores: RRF_score(d) = Σ 1/(k + rank(d)). Empirically, this rank-based blending guarantees that documents matching both exact sparse keys and deep conceptual context rise to the top. The k constant (typically 60) controls resistance to outlier ranks — lower k amplifies high-rank documents, higher k stabilizes across varied query types."
+
+  - type: learning
+    label: WHAT I LEARNED
+    editorial: EXPERIMENTAL_RESULT
+    content: "Introducing a cross-encoder reranker (BGE-reranker-large) provided an immediate 15–22% gain in MRR@5 on our internal evaluation set of 340 query-document pairs. However, cross-encoders incur a quadratic compute penalty against retrieved token length. The critical architectural boundary I identified was: limit the rerank pool to top-25 chunks and cache MD5 hash signatures of frequent query-document pairs. This maintained sub-400ms end-to-end response budgets while preserving precision gains."
+
+  - type: code
+    label: IMPLEMENTATION REFERENCE
+    language: python
+    caption: "RRF implementation with configurable k constant — from the Enterprise RAG system"
+    content: |
+      def reciprocal_rank_fusion(
+          rankings: list[list[str]],
+          k: int = 60
+      ) -> dict[str, float]:
+          """
+          Combine multiple ranked lists using Reciprocal Rank Fusion.
+          Bypasses score normalization by operating purely on rank positions.
+
+          Args:
+              rankings: List of ranked document ID lists (each list = one ranker)
+              k: Constant controlling rank amplification (default: 60)
+
+          Returns:
+              Dict of doc_id -> fused score, sorted descending
+          """
+          scores: dict[str, float] = {}
+          for ranked_list in rankings:
+              for rank, doc_id in enumerate(ranked_list, start=1):
+                  scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank)
+          return dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
+
+  - type: impact
+    label: IMPACT ON MY WORK
+    editorial: PROJECT_EVIDENCE
+    content: "This finding directly informed the two-stage retrieval architecture in the Enterprise Knowledge Assistant: BM25+Dense hybrid retrieval for recall (top-50 candidates), followed by cross-encoder reranking for precision (top-5 returned). The rerank pool cap at 25 was a hard constraint I negotiated after profiling — cross-encoding 50 chunks at 500 tokens each was pushing past 1.8 seconds, which was above the product's acceptable threshold for a real-time Q&A interface."
+
+relatedProjects:
+  - enterprise-hybrid-rag
+relatedLabs:
+  - exp-01-rrf-vs-weighted-fusion
+relatedObservations:
+  - mechanics-of-daily-planning
+relatedTechnologies:
+  - LlamaIndex
+  - ChromaDB
+  - BM25
+  - BGE-Reranker
+  - FastAPI
+  - Python
+
+editorial:
+  keyQuestion: "Can sub-50ms token-level speculative reranking supersede heavy cross-encoders on domain-specific documentation corpora?"
+  hypothesis: "Reranking precision is bounded not by model quality but by chunking granularity — smaller, semantically coherent chunks may eliminate the need for cross-encoders entirely in narrow domain-specific corpora."
+
+draft: false

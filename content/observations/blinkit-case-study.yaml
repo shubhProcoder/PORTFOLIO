@@ -1,0 +1,42 @@
+slug: blinkit-case-study
+title: "Breaking Down Blinkit's 10-Minute Delivery Architecture"
+subtitle: "How micro-fulfillment centers and hyper-local routing rewrite supply chain economics"
+type: EXTERNAL_PUBLICATION
+status: PUBLISHED
+excerpt: "A deep dive into how Blinkit achieved sub-10 minute delivery times by abandoning traditional hub-and-spoke models for dark store networks."
+createdAt: "2024-05-15"
+publishedAt: "2024-05-20"
+source:
+  kind: EXTERNAL
+  platform: LINKEDIN
+  originalUrl: "https://linkedin.com/in/shubh/blinkit"
+  canonicalLocation: EXTERNAL
+  availability: AVAILABLE
+tags:
+  - systems-architecture
+  - supply-chain
+  - case-study
+blocks:
+  - type: context
+    label: WHY I WROTE THIS
+    editorial: PERSONAL_OBSERVATION
+    content: "Quick commerce has always fascinated me, specifically the transition from 2-day delivery to 10-minute delivery. I wanted to break down the technical primitives making this possible."
+  - type: observation
+    label: WHAT I OBSERVED
+    editorial: SOURCE_DERIVED
+    content: "Blinkit does not use a centralized warehouse. They use a dark store model with micro-fulfillment centers placed within a 2km radius of dense urban clusters. This shifts the complexity from long-haul logistics to last-mile hyper-local routing."
+  - type: learning
+    label: WHAT I LEARNED
+    editorial: INTERPRETATION
+    content: "The software bottleneck is no longer route optimization, but inventory synchronization. If a dark store's inventory state lags by even 30 seconds during peak hours, it results in stockouts and unfulfillable orders, breaking the 10-minute promise."
+  - type: impact
+    label: HOW IT CONNECTED TO MY WORK
+    editorial: PERSONAL_OBSERVATION
+    content: "This research directly influenced how I designed the distributed state synchronization layer in my AgentForge project, prioritizing eventual consistency models for non-critical data while strictly locking high-contention resources."
+relatedProjects:
+  - agentforge
+relatedLabs: []
+relatedObservations: []
+relatedTechnologies:
+  - Distributed Systems
+draft: false

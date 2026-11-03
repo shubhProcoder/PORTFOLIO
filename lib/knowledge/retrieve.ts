@@ -33,6 +33,7 @@ export function getIndexStats() {
   return {
     totalEntities: index.entities.length,
     totalProjects: index.entities.filter(e => e.type === 'PROJECT').length,
+    totalObservations: index.entities.filter(e => e.type === 'OBSERVATION').length,
     totalRelationships: index.relationships.length,
   };
 }
@@ -127,6 +128,8 @@ type QueryIntent =
   | 'CONTRIBUTION'
   | 'FAILURE'
   | 'LEARNING'
+  | 'OBSERVATION'
+  | 'EXTERNAL_PUBLICATIONS'
   | 'CURRENT_STATE'
   | 'TECHNOLOGY'
   | 'RAG_ARCHITECTURE'
@@ -158,6 +161,10 @@ function detectIntent(query: string): QueryIntent {
     return 'PRODUCTION_AGENT_CHECK';
   }
 
+  if (/external.*(publication|post|article)|show external|linkedin/i.test(q))
+    return 'EXTERNAL_PUBLICATIONS';
+  if (/observation|notice|field note|what has shubh learned|what did shubh learn|what changed in shubh's thinking|which observations/i.test(q))
+    return 'OBSERVATION';
 
   if (/what (is|are).*building now|current|right now|working on/i.test(q)) return 'CURRENT_STATE';
   if (/contribut|personally|personal role|my role|what did (he|shubh) (do|build)/i.test(q))
@@ -225,10 +232,20 @@ function scoreEntity(entity: KnowledgeEntity, terms: string[], intent: QueryInte
     case 'LEARNING':
       if (entity.type === 'PROJECT' && entity.fields.learnings) score += 0.6;
       if (entity.type === 'LAB' && entity.fields.learning) score += 0.6;
+      if (entity.type === 'OBSERVATION') score += 0.7;
       if (entity.type === 'THINKING') score += 0.5;
+      break;
+    case 'OBSERVATION':
+      if (entity.type === 'OBSERVATION') score += 0.8;
+      if (entity.type === 'PROJECT') score += 0.3;
+      if (entity.type === 'LAB') score += 0.3;
+      break;
+    case 'EXTERNAL_PUBLICATIONS':
+      if (entity.type === 'OBSERVATION' && entity.fields.source_kind === 'EXTERNAL') score += 1.0;
       break;
     case 'RAG_ARCHITECTURE':
       if (entity.id === 'project-enterprise-hybrid-rag') score += 1.0;
+      if (entity.id === 'obs-evaluating-retrieval') score += 0.9;
       if (entity.id.includes('rrf')) score += 0.8;
       if (entity.id === 'project-geointel-ai') score += 0.4;
       break;
@@ -242,6 +259,7 @@ function scoreEntity(entity: KnowledgeEntity, terms: string[], intent: QueryInte
     case 'TECHNOLOGY':
       if (entity.type === 'TECHNOLOGY') score += 0.4;
       if (entity.type === 'PROJECT') score += 0.3;
+      if (entity.type === 'OBSERVATION') score += 0.3;
       break;
     case 'JOURNEY':
       if (entity.type === 'JOURNEY') score += 0.6;
@@ -251,7 +269,7 @@ function scoreEntity(entity: KnowledgeEntity, terms: string[], intent: QueryInte
 
   // Status weighting: prefer verified/completed items
   if (score > 0) {
-    if (entity.status === 'COMPLETED' || entity.status === 'VALIDATED') score += 0.15;
+    if (entity.status === 'COMPLETED' || entity.status === 'VALIDATED' || entity.status === 'PUBLISHED') score += 0.15;
     if (entity.status === 'IN_PROGRESS' || entity.status === 'ACTIVE') score += 0.08;
   }
 
@@ -286,9 +304,19 @@ function extractStructuredData(entity: KnowledgeEntity) {
     results: f.results as string[] | undefined,
     stack: f.stack as string[] | undefined,
     coreFeatures: f.core_features as string[] | undefined,
-    learning: f.learning as string | undefined,
+    learning: (f.learning || f.learnings) as string | undefined,
     hypothesis: f.hypothesis as string | undefined,
     evidence: f.evidence as string | undefined,
+    // Observation specific fields
+    observation: f.observation as string | undefined,
+    context: f.context as string | undefined,
+    analysis: f.analysis as string | undefined,
+    impact: f.impact as string | undefined,
+    keyQuestion: f.keyQuestion as string | undefined,
+    observationType: f.type as string | undefined,
+    sourcePlatform: f.source_platform as string | undefined,
+    sourceKind: f.source_kind as string | undefined,
+    originalUrl: f.original_url as string | undefined,
   };
 }
 
@@ -305,6 +333,12 @@ function buildMatchedContent(entity: KnowledgeEntity, matchedFields: string[]): 
   if (parts.length === 0) {
     for (const key of [
       'title',
+      'observation',
+      'learning',
+      'impact',
+      'analysis',
+      'context',
+      'excerpt',
       'architecture',
       'approach',
       'personal_contribution',
@@ -466,7 +500,7 @@ function generateAnswer(
   }
 
   // Case 7: Project List / Overview
-  if (intent === 'PROJECT_LIST' || projectEvidence.length >= 2) {
+  if (intent === 'PROJECT_LIST' || (projectEvidence.length >= 2 && intent !== 'OBSERVATION' && intent !== 'EXTERNAL_PUBLICATIONS')) {
     const list = projectEvidence.map((p, idx) => {
       const data = p.structuredData;
       const stack = data?.stack ? data.stack.join(', ') : '';
@@ -486,8 +520,72 @@ function generateAnswer(
     };
   }
 
-  // Case 8: General Project Detail / Specific Topic
+  const observationEvidence = evidence.filter((e) => e.entityType === 'OBSERVATION');
+
+  // Case 8: External Publications
+  if (intent === 'EXTERNAL_PUBLICATIONS') {
+    const externalObs = observationEvidence.filter(
+      (o) => o.structuredData?.sourcePlatform || o.sourcePath.includes('blinkit')
+    );
+    if (externalObs.length > 0) {
+      const list = externalObs.map((obs, idx) => {
+        const d = obs.structuredData;
+        return `**${idx + 1}. ${obs.entityTitle}** [${d?.sourcePlatform || 'EXTERNAL'} · PUBLISHED]\n• **Platform:** ${d?.sourcePlatform || 'LinkedIn'}\n• **What Was Observed:** ${d?.observation || obs.matchedContent}\n• **Key Learning:** ${d?.learning || 'Logistics and architecture synchronization trade-offs'}\n• **Source Record:** \`content/${obs.sourcePath}\` (Route: \`${obs.route}\`)`;
+      });
+
+      return {
+        answer: `### External Publications & Systems Breakdown\n\nShubh has authored field notes and architecture breakdowns published across external platforms:\n\n${list.join('\n\n')}\n\nEach external publication is grounded in technical systems analysis and links directly to verified source files.`,
+        supportStatus: 'VERIFIED_FACT',
+        trustNote: 'Extracted from verified external observation records in content/observations/.',
+        keyDataPoints: externalObs.map((o) => `${o.entityTitle} (${o.structuredData?.sourcePlatform || 'External'})`),
+      };
+    }
+  }
+
+  // Case 9: Dedicated Observation or Top Match is Observation
   const top = evidence[0];
+  if (intent === 'OBSERVATION' || top.entityType === 'OBSERVATION') {
+    const obs = observationEvidence[0] || top;
+    const d = obs.structuredData;
+    const parts: string[] = [
+      `### Observation: ${obs.entityTitle}`,
+      `**Classification:** ${d?.observationType || 'TECHNICAL NOTE'} | **Status:** ${obs.status}`,
+    ];
+
+    if (d?.context) {
+      parts.push(`• **Context:** ${d.context}`);
+    }
+    if (d?.observation) {
+      parts.push(`• **What Was Noticed:** ${d.observation}`);
+    }
+    if (d?.analysis) {
+      parts.push(`• **Analysis:** ${d.analysis}`);
+    }
+    if (d?.learning) {
+      parts.push(`• **What Was Learned:** ${d.learning}`);
+    }
+    if (d?.impact) {
+      parts.push(`• **Impact on Work:** ${d.impact}`);
+    }
+    if (d?.keyQuestion) {
+      parts.push(`• **Open Research Question:** "${d.keyQuestion}"`);
+    }
+
+    parts.push(`\n*Source Record:* \`content/${obs.sourcePath}\` (Route: \`${obs.route}\`).`);
+
+    return {
+      answer: parts.join('\n\n'),
+      supportStatus: 'VERIFIED_FACT',
+      trustNote: `Directly grounded in published observation record '${obs.entityTitle}'.`,
+      keyDataPoints: [
+        `Observation: ${obs.entityTitle}`,
+        d?.learning ? `Key Learning: ${d.learning.substring(0, 80)}...` : `Status: ${obs.status}`,
+        d?.impact ? `Impact: ${d.impact.substring(0, 80)}...` : 'Evidence state verified',
+      ],
+    };
+  }
+
+  // Case 10: General Project Detail / Specific Topic
   const data = top.structuredData;
   const techStack = data?.stack ? data.stack.join(', ') : '';
 
@@ -572,20 +670,82 @@ export function retrieve(query: string): QueryResult {
     .sort((a, b) => b.score - a.score)
     .slice(0, 8);
 
-  // Build rich evidence objects with structured data
-  const evidence: EvidenceObject[] = scored.map((s) => ({
-    entityId: s.entity.id,
-    entityType: s.entity.type,
-    entityTitle: s.entity.title,
-    sourcePath: s.entity.sourcePath,
-    route: s.entity.route,
-    status: s.entity.status,
-    evidenceState: s.entity.evidenceState,
-    matchedContent: buildMatchedContent(s.entity, s.matchedFields),
-    matchedFields: s.matchedFields,
-    relevanceScore: s.score,
-    structuredData: extractStructuredData(s.entity),
-  }));
+  // Build rich evidence objects with structured data (decomposing observations into Evidence Units)
+  const evidence: EvidenceObject[] = scored.flatMap((s) => {
+    const baseStructuredData = extractStructuredData(s.entity);
+
+    if (s.entity.type === 'OBSERVATION') {
+      const units: EvidenceObject[] = [];
+      const blocksToCheck = ['context', 'observation', 'analysis', 'learning', 'impact', 'code', 'quote', 'question'];
+      
+      let matchedAnyBlock = false;
+      for (const blockName of blocksToCheck) {
+        if (s.matchedFields.includes(blockName)) {
+          matchedAnyBlock = true;
+          units.push({
+            entityId: s.entity.id,
+            entityType: s.entity.type,
+            entityTitle: s.entity.title,
+            sourcePath: s.entity.sourcePath,
+            route: s.entity.route,
+            status: s.entity.status,
+            evidenceState: s.entity.evidenceState,
+            matchedContent: `${blockName.toUpperCase()}: ${s.entity.fields[blockName]}`,
+            matchedFields: [blockName],
+            relevanceScore: s.score,
+            structuredData: baseStructuredData,
+            provenance: {
+              sourceKind: baseStructuredData.sourceKind || 'NATIVE',
+              sourcePlatform: baseStructuredData.sourcePlatform || 'PORTFOLIO',
+              author: 'Shubh Mehrotra',
+              blockType: blockName,
+              originalUrl: baseStructuredData.originalUrl,
+            }
+          });
+        }
+      }
+      
+      if (matchedAnyBlock) {
+        return units;
+      }
+      
+      // If no specific block matched (e.g. matched title), return a generalized unit
+      return [{
+        entityId: s.entity.id,
+        entityType: s.entity.type,
+        entityTitle: s.entity.title,
+        sourcePath: s.entity.sourcePath,
+        route: s.entity.route,
+        status: s.entity.status,
+        evidenceState: s.entity.evidenceState,
+        matchedContent: buildMatchedContent(s.entity, s.matchedFields),
+        matchedFields: s.matchedFields,
+        relevanceScore: s.score,
+        structuredData: baseStructuredData,
+        provenance: {
+          sourceKind: baseStructuredData.sourceKind || 'NATIVE',
+          sourcePlatform: baseStructuredData.sourcePlatform || 'PORTFOLIO',
+          author: 'Shubh Mehrotra',
+          blockType: 'generalized',
+          originalUrl: baseStructuredData.originalUrl,
+        }
+      }];
+    }
+
+    return [{
+      entityId: s.entity.id,
+      entityType: s.entity.type,
+      entityTitle: s.entity.title,
+      sourcePath: s.entity.sourcePath,
+      route: s.entity.route,
+      status: s.entity.status,
+      evidenceState: s.entity.evidenceState,
+      matchedContent: buildMatchedContent(s.entity, s.matchedFields),
+      matchedFields: s.matchedFields,
+      relevanceScore: s.score,
+      structuredData: baseStructuredData,
+    }];
+  });
 
   // Related entities via graph
   const matchedIds = new Set(scored.map((s) => s.entity.id));
@@ -611,9 +771,11 @@ export function getExampleQueries(): string[] {
   return [
     'What AI systems has Shubh actually built?',
     'Explain the Hybrid RAG architecture and why RRF was used.',
+    'What has Shubh learned about retrieval?',
+    'What observations are connected to the Enterprise RAG project?',
     'What did Shubh personally contribute across projects?',
     'What were the failure modes and trade-offs encountered?',
-    'Did Shubh handle production workloads for 100K+ users?',
-    'What is AgentForge and how does it evaluate agents?',
+    'What has Shubh written about product systems?',
+    'Show external publications about AI.',
   ];
 }
