@@ -11,10 +11,11 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
   const projects = getProjects();
   const project = projects.find(
-    (p) => (p.slug || p.id || p.title.toLowerCase().replace(/\s+/g, '-')) === params.slug
+    (p) => (p.slug || p.id || p.title.toLowerCase().replace(/\s+/g, '-')) === slug
   );
 
   if (!project) return {};
@@ -25,10 +26,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default function ProjectPage({ params }: { params: { slug: string } }) {
+export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const projects = getProjects();
   const project = projects.find(
-    (p) => (p.slug || p.id || p.title.toLowerCase().replace(/\s+/g, '-')) === params.slug
+    (p) => (p.slug || p.id || p.title.toLowerCase().replace(/\s+/g, '-')) === slug
   );
 
   if (!project) {

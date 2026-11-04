@@ -8,7 +8,6 @@ const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-editorial',
   display: 'swap',
-  axes: ['opsz', 'SOFT', 'WONK'],
 });
 
 const ibmPlexSans = IBM_Plex_Sans({
